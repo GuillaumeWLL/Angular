@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset= "utf-8" />
+    <title>Mon Super Chat !</title>
+    <style>
+        #zone_chat strong {
+          color: white ;
+          background-color: black ;
+          padding : 2px;
+        }
+    </style>
+  </head>
+
+  <body>
+    <h1>Mon Super Chat !! </h1>
+<!-- on crée un champ d'entree et un bouton d'envoi -->
+    <p><input type = "text" placeholder="Taper votre message" id="myText" name = "textZone"/>
+       <input type ="submit" value = "Send" id="msg" onclick = "sendMyText();"/>
+    </p>
+
+    <section id = "zone_chat">
+
+    </section>
+
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"> </script>
+
+    <script src = "socket.io/socket.io.js"> </script>
+    <script>
+/* connection au serveur en 8080 */
+      var socket = io.connect( 'http://localhost:8080' ) ;
+/* demande et envoi du pseudo */
+      var pseudo = prompt( 'Entrer un pseudo pour utiliser le chat') ;
+      socket.emit('newMember' , pseudo ) ;
+/* quand on a un nouvel utilisateur on affiche a tous les utilisateurs le nouvel arrivant */
+      socket.on( 'newOne' , function( data ) {
+        alert('Nouvel arrivant : ' + data.name )
+      })
+
+/*on recupere le message dans la page*/
+  socket.on( 'message' , function( data ) {
+    insereMessage( data.pseudo , data.message ) ;
+      $('textZone').val('').focus() ;
+  })
+
+/* fonction pour récupérer le texte saisi*/
+      function sendMyText()
+      {
+        socket.emit( 'message' , document.getElementById( "myText" ).value ) ;
+        insereMessage( pseudo , document.getElementById( "myText" ).value ) ;
+      }
+
+      function insereMessage( pseudo , message ) {
+        $('#zone_chat').append('<p><strong>' + pseudo + '</strong>' + message + '<p>') ;
+      }
+    </script>
+  </body>
+</html>
